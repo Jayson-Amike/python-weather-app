@@ -1,5 +1,6 @@
 import tkinter as tk
 from getLoc import table_data
+from conn import get_weather_data
 
 def on_search():
     search_text = search_var.get().lower()
@@ -16,10 +17,17 @@ def on_select(event):
     selected_index = widget.curselection()[0]
     selected_item = widget.get(selected_index)
     #testing collected info
-    search_value = "Yorkton, SK, Canada"
+    search_value = selected_item
     corresponding_data = data_dict.get(search_value)
-    # Add label in the center of additional_info_frame
-    additional_label = tk.Label(additional_info_frame, text=corresponding_data, bg="white")
+    latitude = corresponding_data[0]
+    longitude = corresponding_data[1]
+    weather_data = get_weather_data(latitude, longitude)
+    
+        # Update the existing label's text
+    additional_label.config(text=weather_data.head(24))
+
+    update_treeview(weather_data)
+
     additional_label.pack(expand=True, fill="both", pady=10)  # Pack the label with expansion
     search_var.set(selected_item)
 
@@ -60,10 +68,16 @@ search_results_frame.grid_columnconfigure(2, weight=1)
 # Create a blank widget taking up 50% width and 100% height on the right
 additional_info_frame = tk.Frame(search_results_frame, bg="white")
 additional_info_frame.grid(row=0, column=2, sticky="nsew")
+
+
 for item in cities:
     search_results.insert(tk.END, item)
 
 search_results.bind('<<ListboxSelect>>', on_select)
 search_entry.bind('<KeyRelease>', on_search_entry_changed)
+
+# Create a blank label initially
+additional_label = tk.Label(additional_info_frame, bg="white")
+additional_label.pack(expand=True, fill="both", pady=10)  # Pack the label with expansion
 
 root.mainloop()
